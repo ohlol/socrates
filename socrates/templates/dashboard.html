@@ -65,12 +65,15 @@
       <ul class="nav nav-pills graph-meta pull-right">
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" data-target="#" href="/dashboard/">
-            configure
+            options
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-            <li><a tabindex="-1" href="#">targets</a>
-            <li><a tabindex="-1" href="#">options</a>
+            <li><a tabindex="-1" href="#">targets</a></li>
+            <li><a tabindex="-1" href="#">options</a></li>
+            <li class="divider"></li>
+            <li><a tabindex="-1" data-bind="attr: { href:
+                                            graph.graphUrl }">link</a></li>
           </ul>
         </li>
       </ul>
