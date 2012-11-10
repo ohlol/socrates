@@ -1,0 +1,42 @@
+body {
+    padding-top: 60px;
+}
+
+@media (max-width: 979px) {
+    body {
+        padding-top: 0px;
+    }
+}
+
+div.button-well {
+    display: table;
+    width: 100%;
+}
+
+div.button-well>div>button {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+div.graph {
+    border: 1px solid #e3e3e3;
+    background-color: #ffffff;
+    padding: 2px;
+    margin-bottom: 20px;
+}
+
+a.settings {
+    padding-left: 5px;
+    margin-left: 2px;
+}
+
+section#graphs {
+    background-color: #e3e3e3;
+    padding: 20px;
+}
+
+@media (min-width: 1200px) {
+    .row-fluid .current-toggle {
+        width: 8%;
+    }
+}

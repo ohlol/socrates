@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div class="span12">
+        <h1>Index</h1>
+        <div id="chart"></div>
+      </div>
+    </div>
+  </div>
+<script>
+
+var tv = 1000;
+var graph = new Rickshaw.Graph( {
+	element: document.getElementById("chart"),
+	width: 900,
+	height: 500,
+	renderer: 'line',
+	series: new Rickshaw.Series.FixedDuration([{ name: 'one' }], undefined, {
+		timeInterval: tv,
+		maxDataPoints: 100,
+		timeBase: new Date().getTime() / 1000
+	})
+} );
+
+graph.render();
+
+// add some data every so often
+
+var i = 0;
+var iv = setInterval( function() {
+
+	var data = { one: Math.floor(Math.random() * 40) + 120 };
+
+	var randInt = Math.floor(Math.random()*100);
+	data.two = (Math.sin(i++ / 40) + 4) * (randInt + 400);
+	data.three = randInt + 300;
+        console.log(data);
+	graph.series.addData(data);
+	graph.render();
+
+}, tv );
+
+</script>
+{% endblock %}
