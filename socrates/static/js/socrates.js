@@ -4,19 +4,21 @@ $(function() {
         var vm = viewModel;
         var defaultOptions = {
             'width': 665,
-            'height': 330,
-            'from': vm.from(),
-            'until': vm.until()
+            'height': 330
         };
 
-        targets = typeof targets !== 'undefined' ? targets : [];
-        self.targets = targets.length > 0 ? targets : defaultGraph['targets'];
-        self.options = $.extend({}, options, defaultGraph['options'])
+        targets = (typeof targets === 'undefined' || targets.length == 0) ? defaultGraph['targets'] : targets;
+        options = $.extend({}, defaultGraph['options'], options)
+
+        self.graphTargets = ko.observableArray();
+        for (i = 0; i < targets.length; i++) {
+            self.graphTargets.push(ko.observable(targets[i]));
+        }
 
         self.graphOptions = ko.computed(function() {
-            self.options['from'] = vm.from();
-            self.options['until'] = vm.until();
-            return $.extend({}, defaultOptions, self.options);
+            options['from'] = vm.from();
+            options['until'] = vm.until();
+            return $.extend({}, defaultOptions, options);
         });
 
         self.graphUrl = ko.computed(function() {
@@ -26,7 +28,9 @@ $(function() {
                     params.push(opt+'='+encodeURIComponent(self.graphOptions()[opt]));
                 }
             }
-            self.targets.map(function(target){ params.push('target='+encodeURIComponent(target)); });
+            self.graphTargets().map(function(target) {
+                params.push('target='+encodeURIComponent(target()));
+            });
         
             return graphiteUrl+'/render?'+params.join('&');
         });
@@ -42,6 +46,11 @@ $(function() {
                 break;
             }
         });
+
+        self.showGraph = function(graph) {
+            vm.graph(graph);
+            $('#graph-link-modal').modal();
+        }
     }
 
     function DashboardViewModel() {
@@ -49,6 +58,8 @@ $(function() {
 
         self.from = ko.observable('-1h');
         self.until = ko.observable('now');
+        self.graph = ko.observable();
+        self.graphTargets = ko.observableArray();
         self.rows = ko.observableArray([{
             graphs: [
                 new Graph(self, [], {}),
@@ -79,7 +90,7 @@ $(function() {
         self.updateFrom = function(from) {
             self.from(from);
         }
-    }
+    };
 
     ko.applyBindings(new DashboardViewModel());
 

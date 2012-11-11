@@ -1,11 +1,17 @@
-body {
-    padding-top: 60px;
-}
-
 @media (max-width: 979px) {
     body {
         padding-top: 0px;
     }
+}
+
+@media (min-width: 1200px) {
+    .row-fluid .current-toggle {
+        width: 8%;
+    }
+}
+
+body {
+    padding-top: 60px;
 }
 
 div.button-well {
@@ -21,7 +27,6 @@ div.button-well>div>button {
 div.graph {
     border: 1px solid #e3e3e3;
     background-color: #ffffff;
-    padding: 2px;
     margin-bottom: 20px;
 }
 
@@ -35,8 +40,6 @@ section#graphs {
     padding: 20px;
 }
 
-@media (min-width: 1200px) {
-    .row-fluid .current-toggle {
-        width: 8%;
-    }
+div.current-toggle {
+    padding-right: 15px;
 }

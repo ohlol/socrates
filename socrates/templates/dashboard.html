@@ -5,55 +5,76 @@
 {% endblock %}
 {% block content %}
 <div class="row-fluid">
-  <div class="well well-small button-well">
-    <div class="btn-group span2 current-toggle" data-toggle-name="current-toggle"
-         data-toggle="buttons-radio">
-      <button type="button" value="current" class="btn btn-inverse
-                                                active" data-toggle="button">Live</button>
-      <button type="button" value="custom" class="btn btn-inverse" data-tiggle="button">Custom</button>
-    </div>
-    <div class="span3">
-      <div class="btn-group" data-toggle-name="from-buttons" data-toggle="buttons-radio">
-        <button type="button" value="-1h" class="btn active"
-                data-bind="click: function(data, event) {
-                           updateFrom('-1h', data, event)
-                           }" data-toggle="button">1h</button>
-        <button type="button" value="-2h" class="btn"
-                data-bind="click: function(data, event) {
-                           updateFrom('-2h', data, event)
-                           }" data-toggle="button">2h</button>
-        <button type="button" value="-4h" class="btn"
-                data-bind="click: function(data, event) {
-                           updateFrom('-4h', data, event)
-                           }" data-toggle="button">4h</button>
-        <button type="button" value="-12h" class="btn"
-                data-bind="click: function(data, event) {
-                           updateFrom('-12h', data, event)
-                           }" data-toggle="button">12h</button>
-        <button type="button" value="-1d" class="btn"
-                data-bind="click: function(data, event) {
-                           updateFrom('-1d', data, event)
-                           }" data-toggle="button">1d</button>
-        <button type="button" value="-1w" class="btn"
-                data-bind="click: function(data, event) {
-                           updateFrom('-1w', data, event)
-                           }" data-toggle="button">1w</button>
-      </div>
-      <div class="form-inline hide" data-toggle-name="custom-range">
-        <input type="text" class="input-small" data-bind="value: from" />
-        <input type="text" class="input-small" data-bind="value: until" />
-      </div>
-    </div>
-    <div class="btn-group pull-right">
-      <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#">
-        Add row
-        <span class="caret"></span>
-      </a>
-      <ul class="dropdown-menu">
-        <li><a tabindex="-1" href="#" data-bind="click: function(data, event) {
-                                                 addRow(1, data, event) }">1x1</a></li>
-        <li><a tabindex="-1" href="#" data-bind="click: function(data, event) {
-                                                 addRow(2, data, event) }">1x2</a></li>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <ul class="nav">
+        <li>
+          <div class="btn-group current-toggle" data-toggle-name="current-toggle"
+               data-toggle="buttons-radio">
+            <button type="button" value="current" class="btn btn-inverse active"
+                    data-toggle="button">Now</button>
+            <button type="button" value="custom" class="btn btn-inverse"
+                    data-toggle="button">Range</button>
+          </div>
+        </li>
+        <li>
+          <div class="btn-group" data-toggle-name="from-buttons" data-toggle="buttons-radio">
+            <button type="button" value="-1h" class="btn active"
+                    data-bind="click: function(data, event) {
+                               updateFrom('-1h', data, event)
+                               }" data-toggle="button">1h</button>
+            <button type="button" value="-2h" class="btn"
+                    data-bind="click: function(data, event) {
+                               updateFrom('-2h', data, event)
+                               }" data-toggle="button">2h</button>
+            <button type="button" value="-4h" class="btn"
+                    data-bind="click: function(data, event) {
+                               updateFrom('-4h', data, event)
+                               }" data-toggle="button">4h</button>
+            <button type="button" value="-12h" class="btn"
+                    data-bind="click: function(data, event) {
+                               updateFrom('-12h', data, event)
+                               }" data-toggle="button">12h</button>
+            <button type="button" value="-1d" class="btn"
+                    data-bind="click: function(data, event) {
+                               updateFrom('-1d', data, event)
+                               }" data-toggle="button">1d</button>
+            <button type="button" value="-1w" class="btn"
+                    data-bind="click: function(data, event) {
+                               updateFrom('-1w', data, event)
+                               }" data-toggle="button">1w</button>
+          </div>
+          <div class="form-inline hide" data-toggle-name="custom-range">
+            <div class="input-prepend" style="margin-top: 5px;">
+              <span class="add-on">from</span>
+              <input type="text" class="input-small" id="from-input"
+                     data-bind="value: from" />
+            </div>
+            <div class="input-prepend" style="margin-top: 5px;">
+              <span class="add-on">until</span>
+              <input type="text" class="input-small" id="until-input"
+                     data-bind="value: until" />
+            </div>
+          </div>
+        </li>
+      </ul>
+      <ul class="nav pull-right">
+        <li>
+          <div class="btn-group pull-right">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+              Add row
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a tabindex="-1" href="#" data-bind="click: function(data, event) {
+                                                       addRow(1, data, event) }">1x1</a></li>
+              <li><a tabindex="-1" href="#" data-bind="click: function(data, event) {
+                                                       addRow(2, data, event) }">1x2</a></li>
+            </ul>
+          </div>
+        </li>
+        <li><span class="divider-vertical"></span></li>
+        <li><button class="btn btn-primary">Save</button></li>
       </ul>
     </div>
   </div>
@@ -63,17 +84,15 @@
   <div class="row-fluid" data-bind="foreach: { data: graphs, as: 'graph' }">
     <div data-bind="attr: { class: graph.spanClass }">
       <ul class="nav nav-pills graph-meta pull-right">
+        <li><a data-bind="click: graph.showGraph">Permalink</a></li>
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" data-target="#" href="/dashboard/">
-            options
+            Options
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-            <li><a tabindex="-1" href="#">targets</a></li>
-            <li><a tabindex="-1" href="#">options</a></li>
-            <li class="divider"></li>
-            <li><a tabindex="-1" data-bind="attr: { href:
-                                            graph.graphUrl }">link</a></li>
+            <li><a tabindex="-1" data-bind="click: graph.editTargets">Edit targets</a></li>
+            <li><a tabindex="-1" data-bind="click: graph.editSettings">Update settings</a></li>
           </ul>
         </li>
       </ul>
@@ -81,4 +100,18 @@
     </div>
   </div>
 </section>
+<div class="modal hide fade" id="graph-link-modal" data-bind="with: graph">
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">&times;</a>
+    <h3>Graph link</h3>
+  </div>
+  <div class="modal-body">
+    <p align="center">
+      <input type="text" class="span5" readonly="readonly" data-bind="value: graphUrl" />
+    </p>
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-primary" data-dismiss="modal">Close</a>
+  </div>
+</div>
 {% endblock %}
