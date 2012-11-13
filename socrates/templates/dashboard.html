@@ -5,6 +5,8 @@
 {% endblock %}
 {% block content %}
 <div class="row-fluid">
+  <input class="input-block-level" type="text" data-bind="value: name"
+         placeholder="My Dashboard">
   <div class="navbar">
     <div class="navbar-inner">
       <ul class="nav">
@@ -80,19 +82,24 @@
   </div>
 </div>
 
-<section id="graphs" data-bind="foreach: { data: rows }">
-  <div class="row-fluid" data-bind="foreach: { data: graphs, as: 'graph' }">
+<section id="graphs" data-bind="foreach: { data: rows, as: 'row' }">
+  <div class="row-fluid" data-bind="foreach: { data: row.graphs, as: 'graph' }">
     <div data-bind="attr: { class: graph.spanClass }">
       <ul class="nav nav-pills graph-meta pull-right">
-        <li><a data-bind="click: graph.showGraph">Permalink</a></li>
+        <li><a data-bind="click: function(data, event) {
+                          showGraphModal('#graph-link-modal') }">Permalink</a></li>
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" data-target="#" href="/dashboard/">
             Options
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-            <li><a tabindex="-1" data-bind="click: graph.editTargets">Edit targets</a></li>
-            <li><a tabindex="-1" data-bind="click: graph.editSettings">Update settings</a></li>
+            <li><a tabindex="-1" data-bind="click: function(data, event) {
+                                            showGraphModal('#graph-edit-targets-modal')
+                                            }">Edit targets</a></li>
+            <li><a tabindex="-1" data-bind="click: function(data, event) {
+                                            showGraphModal('#graph-edit-settings-modal')
+                                            }">Update settings</a></li>
           </ul>
         </li>
       </ul>
@@ -112,6 +119,22 @@
   </div>
   <div class="modal-footer">
     <a class="btn btn-primary" data-dismiss="modal">Close</a>
+  </div>
+</div>
+<div class="modal hide fade" id="graph-edit-targets-modal" data-bind="with: graph">
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">&times;</a>
+    <h3>Edit targets</h3>
+  </div>
+  <div class="modal-body">
+    <p align="center">
+      <!-- ko foreach: graphTargets -->
+      <input type="text" class="span5" data-bind="value: path"></input>
+      <!-- /ko -->
+    </p>
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-primary" data-dismiss="modal" data-bind="click: saveTargets">Close</a>
   </div>
 </div>
 {% endblock %}

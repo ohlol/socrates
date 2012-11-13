@@ -1,24 +1,23 @@
 $(function() {
-    function Graph(viewModel, targets, options) {
+    function Graph(vm, targets, options) {
         var self = this;
-        var vm = viewModel;
         var defaultOptions = {
             'width': 665,
             'height': 330
         };
 
-        targets = (typeof targets === 'undefined' || targets.length == 0) ? defaultGraph['targets'] : targets;
-        options = $.extend({}, defaultGraph['options'], options)
+        self.targets = (typeof targets === 'undefined' || targets.length == 0) ? defaultGraph['targets'] : targets;
+        self.options = $.extend({}, defaultGraph['options'], options);
 
         self.graphTargets = ko.observableArray();
-        for (i = 0; i < targets.length; i++) {
-            self.graphTargets.push(ko.observable(targets[i]));
+        for (var i = 0; i < targets.length; i++) {
+            self.graphTargets.push({'path': targets[i]});
         }
 
         self.graphOptions = ko.computed(function() {
-            options['from'] = vm.from();
-            options['until'] = vm.until();
-            return $.extend({}, defaultOptions, options);
+            self.options['from'] = vm.from();
+            self.options['until'] = vm.until();
+            return $.extend({}, defaultOptions, self.options);
         });
 
         self.graphUrl = ko.computed(function() {
@@ -28,8 +27,8 @@ $(function() {
                     params.push(opt+'='+encodeURIComponent(self.graphOptions()[opt]));
                 }
             }
-            self.graphTargets().map(function(target) {
-                params.push('target='+encodeURIComponent(target()));
+           self.graphTargets().map(function(target) {
+                params.push('target='+encodeURIComponent(target['path']));
             });
         
             return graphiteUrl+'/render?'+params.join('&');
@@ -47,19 +46,23 @@ $(function() {
             }
         });
 
-        self.showGraph = function(graph) {
-            vm.graph(graph);
-            $('#graph-link-modal').modal();
+        self.showGraphModal = function(selector) {
+            vm.graph(self);
+            $(selector).modal();
+        }
+
+        self.saveTargets = function(graph) {
+            self.graphTargets(graph.graphTargets());
         }
     }
 
     function DashboardViewModel() {
         var self = this;
 
+        self.name = ko.observable();
         self.from = ko.observable('-1h');
         self.until = ko.observable('now');
         self.graph = ko.observable();
-        self.graphTargets = ko.observableArray();
         self.rows = ko.observableArray([{
             graphs: [
                 new Graph(self, [], {}),
