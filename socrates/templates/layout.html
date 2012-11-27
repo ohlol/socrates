@@ -9,9 +9,11 @@
     <script src="{{ url_for('.static', filename='js/jquery-1.8.2.min.js') }}"></script>
     <script src="{{ url_for('.static', filename='js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('.static', filename='js/knockout-2.2.0.js') }}"></script>
+    <script src="{{ url_for('.static', filename='js/knockout.mapping-latest.js') }}"></script>
     <script src="{{ url_for('.static', filename='js/socrates.js') }}"></script>
     <script>
-      var defaultGraph = JSON.parse('{{ default_graph|safe }}')
+      var dashboard = {{ dashboard|safe }};
+      var defaultGraph = {{ default_graph|safe }};
       var graphiteUrl = '{{ graphite_url }}';
     </script>
     {% endblock %}

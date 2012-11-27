@@ -4,14 +4,8 @@
     }
 }
 
-@media (min-width: 1200px) {
-    .row-fluid .current-toggle {
-        width: 8%;
-    }
-}
-
 body {
-    padding-top: 60px;
+    padding-top: 45px;
 }
 
 div.button-well {
@@ -40,6 +34,22 @@ section#graphs {
     padding: 20px;
 }
 
-div.current-toggle {
-    padding-right: 15px;
+.btn-link {
+    padding: 2px;
+}
+
+.typeahead {
+    z-index: 1051;
+}
+
+.btn.disabled, .btn[disabled] {
+    background-color: transparent;
+}
+
+.graph-meta {
+    padding-left: 8px;
+}
+
+.graph-meta>button {
+    padding-top: 6px;
 }

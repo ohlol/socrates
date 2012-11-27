@@ -5,8 +5,17 @@
 {% endblock %}
 {% block content %}
 <div class="row-fluid">
+  {%- if operation == 'new' -%}
+  <h3>New dashboard</h3>
+  {%- elif operation == 'edit' -%}
+  <h3>Edit <!-- ko text: name --><!-- /ko --></h3>
+  {%- endif -%}
+  {%- if operation == 'view' -%}
+  <h3 data-bind="text: name"></h3>
+  {%- else -%}
   <input class="input-block-level" type="text" data-bind="value: name"
-         placeholder="My Dashboard">
+         placeholder="Name this dashboard">
+  {%- endif -%}
   <div class="navbar">
     <div class="navbar-inner">
       <ul class="nav">
@@ -19,32 +28,27 @@
                     data-toggle="button">Range</button>
           </div>
         </li>
+        <li style="width: 16px;">&nbsp;</li>
         <li>
           <div class="btn-group" data-toggle-name="from-buttons" data-toggle="buttons-radio">
-            <button type="button" value="-1h" class="btn active"
-                    data-bind="click: function(data, event) {
-                               updateFrom('-1h', data, event)
-                               }" data-toggle="button">1h</button>
+            <button type="button" value="-1h" class="btn"
+                    data-bind="click: function() { from('-1h'); },
+                               css: { active: from() === '-1h' }" data-toggle="button">1h</button>
             <button type="button" value="-2h" class="btn"
-                    data-bind="click: function(data, event) {
-                               updateFrom('-2h', data, event)
-                               }" data-toggle="button">2h</button>
+                    data-bind="click: function() { from('-2h'); },
+                               css: { active: from() === '-2h' }" data-toggle="button">2h</button>
             <button type="button" value="-4h" class="btn"
-                    data-bind="click: function(data, event) {
-                               updateFrom('-4h', data, event)
-                               }" data-toggle="button">4h</button>
+                    data-bind="click: function() { from('-4h'); },
+                               css: { active: from() === '-4h' }" data-toggle="button">4h</button>
             <button type="button" value="-12h" class="btn"
-                    data-bind="click: function(data, event) {
-                               updateFrom('-12h', data, event)
-                               }" data-toggle="button">12h</button>
+                    data-bind="click: function() { from('-12h'); },
+                               css: { active: from() === '-12h' }" data-toggle="button">12h</button>
             <button type="button" value="-1d" class="btn"
-                    data-bind="click: function(data, event) {
-                               updateFrom('-1d', data, event)
-                               }" data-toggle="button">1d</button>
+                    data-bind="click: function() { from('-1d'); },
+                               css: { active: from() === '-1d' }" data-toggle="button">1d</button>
             <button type="button" value="-1w" class="btn"
-                    data-bind="click: function(data, event) {
-                               updateFrom('-1w', data, event)
-                               }" data-toggle="button">1w</button>
+                    data-bind="click: function() { from('-1w'); },
+                               css: { active: from() === '-1w' }" data-toggle="button">1w</button>
           </div>
           <div class="form-inline hide" data-toggle-name="custom-range">
             <div class="input-prepend" style="margin-top: 5px;">
@@ -60,6 +64,7 @@
           </div>
         </li>
       </ul>
+      {%- if operation != 'view' -%}
       <ul class="nav pull-right">
         <li>
           <div class="btn-group pull-right">
@@ -69,31 +74,58 @@
             </a>
             <ul class="dropdown-menu">
               <li><a tabindex="-1" href="#" data-bind="click: function(data, event) {
-                                                       addRow(1, data, event) }">1x1</a></li>
+                                                       addRow(1) }">1x1</a></li>
               <li><a tabindex="-1" href="#" data-bind="click: function(data, event) {
-                                                       addRow(2, data, event) }">1x2</a></li>
+                                                       addRow(2) }">1x2</a></li>
             </ul>
           </div>
         </li>
         <li><span class="divider-vertical"></span></li>
-        <li><button class="btn btn-primary">Save</button></li>
+        <li>
+          <button class="btn btn-primary" data-bind="click: function() {
+                                          saveDashboard('{{dashboard_id}}') }">
+            Save
+          </button>
+        </li>
       </ul>
+      {%- endif -%}
     </div>
   </div>
 </div>
 
+<!-- ko if: rows().length > 0 -->
 <section id="graphs" data-bind="foreach: { data: rows, as: 'row' }">
   <div class="row-fluid" data-bind="foreach: { data: row.graphs, as: 'graph' }">
     <div data-bind="attr: { class: graph.spanClass }">
-      <ul class="nav nav-pills graph-meta pull-right">
+      <div class="graph-meta">
+      <button class="btn btn-link" data-bind="click: function() {
+                    graph.settings['from']('-1h'); },
+                    css: { disabled: graph.settings['from']() === '-1h' }">1h</button>
+      <button class="btn btn-link" data-bind="click: function() {
+                    graph.settings['from']('-2h'); },
+                    css: { disabled: graph.settings['from']() === '-2h' }">2h</button>
+      <button class="btn btn-link" data-bind="click: function() {
+                    graph.settings['from']('-4h'); },
+                    css: { disabled: graph.settings['from']() === '-4h' }">4h</button>
+      <button class="btn btn-link" data-bind="click: function() {
+                    graph.settings['from']('-12h'); },
+                    css: { disabled: graph.settings['from']() === '-12h' }">12h</button>
+      <button class="btn btn-link" data-bind="click: function() {
+                    graph.settings['from']('-1d'); },
+                    css: { disabled: graph.settings['from']() === '-1d' }">1d</button>
+      <button class="btn btn-link" data-bind="click: function() {
+                    graph.settings['from']('-1w'); },
+                    css: { disabled: graph.settings['from']() === '-1w' }">1w</button>
+      <ul class="nav nav-pills pull-right">
         <li><a data-bind="click: function(data, event) {
                           showGraphModal('#graph-link-modal') }">Permalink</a></li>
+        {%- if operation != 'view' -%}
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" data-target="#" href="/dashboard/">
             Options
             <span class="caret"></span>
           </a>
-          <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+          <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dLabel">
             <li><a tabindex="-1" data-bind="click: function(data, event) {
                                             showGraphModal('#graph-edit-targets-modal')
                                             }">Edit targets</a></li>
@@ -102,11 +134,14 @@
                                             }">Update settings</a></li>
           </ul>
         </li>
+        {%- endif -%}
       </ul>
+      </div>
       <img data-bind="attr: { src: graph.graphUrl }" />
     </div>
   </div>
 </section>
+<!-- /ko -->
 <div class="modal hide fade" id="graph-link-modal" data-bind="with: graph">
   <div class="modal-header">
     <a class="close" data-dismiss="modal">&times;</a>
@@ -127,14 +162,91 @@
     <h3>Edit targets</h3>
   </div>
   <div class="modal-body">
+    <!-- ko foreach: graphTargets -->
+    <input type="text" class="span5" placeholder="target.name"
+           data-bind="typeahead: path, value: path"></input>
+    <a href="#" data-bind="click: function(data, event) {
+                           $parent.removeTarget(data)
+                           }"><i class="icon-remove"></i></a>
+    <!-- /ko -->
+    <a class="btn" data-bind="click: addTarget">Add</a>
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-primary" data-dismiss="modal"
+       data-bind="click: saveTargets">Close</a>
+  </div>
+</div>
+
+<div class="modal hide fade" id="graph-edit-settings-modal" data-bind="with: graph">
+  <form class="form-horizontal">
+    <div class="modal-header">
+      <a class="close" data-dismiss="modal">&times;</a>
+      <h3>Edit settings</h3>
+    </div>
+    <div class="modal-body" data-bind="with: settings">
+      <div class="control-group">
+        <label class="control-label" for="graph-title">Title</label>
+        <div class="controls">
+          <input type="text" id="graph-title" class="span3"
+                 data-bind="value: title">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="graph-areamode">Area
+          mode</label>
+        <div class="controls">
+          <select id="graph-areamode" data-bind="options:
+          $root.areaModes, value: areaMode"></select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="graph-linemode">Line
+          mode</label>
+        <div class="controls">
+          <select id="graph-linemode" data-bind="options:
+          $root.lineModes, value: lineMode"></select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="graph-yMin">Y axis minimum</label>
+        <div class="controls">
+          <input type="text" id="graph-yMin" class="span3"
+                 data-bind="value: yMin">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="graph-yMax">Y axis maximum</label>
+        <div class="controls">
+          <input type="text" id="graph-yMax" class="span3"
+                 data-bind="value: yMax">
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <label class="checkbox">
+            <input type="checkbox" id="graph-hideLegend"
+                   data-bind="checked: hideLegend">Hide legend</label>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="btn btn-primary" data-dismiss="modal">Close</a>
+    </div>
+  </form>
+</div>
+<div class="modal hide fade" id="dashboard-link-modal">
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">&times;</a>
+    <h3>Dashboard link</h3>
+  </div>
+  <div class="modal-body">
     <p align="center">
-      <!-- ko foreach: graphTargets -->
-      <input type="text" class="span5" data-bind="value: path"></input>
-      <!-- /ko -->
+      <input type="text" class="span5" data-bind="value: '{{ base_url }}/dashboard/' + id()"></input>
     </p>
   </div>
   <div class="modal-footer">
-    <a class="btn btn-primary" data-dismiss="modal" data-bind="click: saveTargets">Close</a>
+    <a class="btn btn-primary" data-dismiss="modal">Close</a>
   </div>
 </div>
 {% endblock %}

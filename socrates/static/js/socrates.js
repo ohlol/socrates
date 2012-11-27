@@ -1,41 +1,83 @@
+var DVM = {};
+
 $(function() {
-    function Graph(vm, targets, options) {
+    function Graph(targets, settings) {
         var self = this;
-        var defaultOptions = {
+        var defaultSettings = {
+            'areaMode': 'none',
+            'height': 330,
+            'hideLegend': '',
+            'lineMode': '',
             'width': 665,
-            'height': 330
+            'yMin': '',
+            'yMax': '',
+            'from': DVM.from(),
+            'until': DVM.until(),
         };
 
-        self.targets = (typeof targets === 'undefined' || targets.length == 0) ? defaultGraph['targets'] : targets;
-        self.options = $.extend({}, defaultGraph['options'], options);
-
-        self.graphTargets = ko.observableArray();
-        for (var i = 0; i < targets.length; i++) {
-            self.graphTargets.push({'path': targets[i]});
+        self.addTarget = function(path) {
+            path = typeof path === 'object' ? '' : path;
+            self.graphTargets.push({'path': path});
         }
 
-        self.graphOptions = ko.computed(function() {
-            self.options['from'] = vm.from();
-            self.options['until'] = vm.until();
-            return $.extend({}, defaultOptions, self.options);
+        self.showGraphModal = function(selector) {
+            DVM.graph(self);
+            $(selector).modal();
+        }
+
+        self.removeTarget = function(target) {
+            self.graphTargets.remove(target);
+        }
+
+        self.saveTargets = function(graph) {
+            DVM.graph().graphTargets(graph.graphTargets());
+        }
+
+        settings = $.extend({}, defaultGraph['settings'], settings);
+        settings = $.extend({}, defaultSettings, settings);
+
+        DVM.from.subscribe(function(value) {
+            settings.from(value);
         });
+        DVM.until.subscribe(function(value) {
+            settings.until(value);
+        });
+
+        self.settings = ko.mapping.fromJS(settings, {});
+
+        targets = (typeof targets === 'undefined' || targets.length == 0) ? defaultGraph['targets'] : targets;
+        self.graphTargets = ko.observableArray();
+
+        for (var i = 0; i < targets.length; i++) {
+            if (targets[i].hasOwnProperty('path')) {
+                    if (typeof targets[i]['path'] == 'function') {
+                        self.addTarget(targets[i]['path']());
+                    } else {
+                        self.addTarget(targets[i]['path']);
+                    }
+            } else {
+                self.addTarget(targets[i]);
+            }
+        }
 
         self.graphUrl = ko.computed(function() {
             var params = []
-            for (var opt in self.graphOptions()){
-                if (self.graphOptions().hasOwnProperty(opt)) {
-                    params.push(opt+'='+encodeURIComponent(self.graphOptions()[opt]));
+            for (var opt in self.settings) {
+                if (self.settings.hasOwnProperty(opt) && opt !== '__ko_mapping__' && opt.length > 0) {
+                    params.push(opt+'='+encodeURIComponent(self.settings[opt]()));
                 }
             }
-           self.graphTargets().map(function(target) {
-                params.push('target='+encodeURIComponent(target['path']));
+            self.graphTargets().map(function(target) {
+                if (target.hasOwnProperty('path') && target['path'].length > 0) {
+                    params.push('target='+encodeURIComponent(target['path']));
+                }
             });
         
             return graphiteUrl+'/render?'+params.join('&');
         });
 
         self.spanClass = ko.computed(function() {
-            switch (self.graphOptions()['width'])
+            switch (self['settings'].width())
             {
             case 665:
                 return 'graph span6';
@@ -45,30 +87,46 @@ $(function() {
                 break;
             }
         });
-
-        self.showGraphModal = function(selector) {
-            vm.graph(self);
-            $(selector).modal();
-        }
-
-        self.saveTargets = function(graph) {
-            self.graphTargets(graph.graphTargets());
-        }
     }
 
-    function DashboardViewModel() {
+    var DashboardViewModel = function(dashboardData) {
         var self = this;
 
-        self.name = ko.observable();
-        self.from = ko.observable('-1h');
-        self.until = ko.observable('now');
+        if (!$.isEmptyObject(dashboardData)) {
+            self = ko.mapping.fromJS(dashboardData);
+        }
+
+        if (!self.hasOwnProperty('name')) {
+            self.name = ko.observable();
+        }
+        if (!self.hasOwnProperty('from')) {
+            self.from = ko.observable('-1h');
+        }
+        if (!self.hasOwnProperty('until')) {
+            self.until = ko.observable('now');
+        }
+        if (!self.hasOwnProperty('areaModes')) {
+            self.areaModes = [
+                'none',
+                'first',
+                'stacked'
+            ];
+        }
+        if (!self.hasOwnProperty('lineModes')) {
+            self.lineModes = [
+                'slope',
+                'staircase',
+                'connected'
+            ];
+        }
+        if (!self.hasOwnProperty('rows')) {
+            self.rows = ko.observableArray();
+        }
+        if (!self.hasOwnProperty('id')) {
+            self.id = ko.observable();
+        }
+
         self.graph = ko.observable();
-        self.rows = ko.observableArray([{
-            graphs: [
-                new Graph(self, [], {}),
-                new Graph(self, [], {})
-            ]
-        }]);
 
         self.addRow = function(numGraphs) {
             var graphs = [];
@@ -84,18 +142,68 @@ $(function() {
             }
 
             for (var i = 0; i < numGraphs; i++) {
-                graphs.push(new Graph(self, [], {'width': width}));
+                graphs.push(new Graph([], {'width': width}));
             }
 
-            self.rows.push({graphs: graphs});
+            DVM.rows.push({graphs: graphs});
         }
 
-        self.updateFrom = function(from) {
-            self.from(from);
+        self.saveDashboard = function(id) {
+            dashboard = DVM;
+            delete dashboard['__ko_mapping__'];
+            var dashboardObj = {
+                id: id,
+                dashboard: ko.mapping.toJSON(dashboard)
+            };
+
+            $.post('/dashboard/save', dashboardObj, function(postData) {
+                self.id(postData.message);
+                $('#dashboard-link-modal').modal();
+            });
+        }
+
+        return self;
+    }
+
+    var mapping = {
+        rows: {
+            create: function(row) {
+                if (typeof row.data === 'object') {
+                    var graphs = [];
+
+                    for (var i = 0; i < row.data.graphs().length; i++) {
+                        graphs.push(new Graph(row.data.graphs()[i].graphTargets(),
+                                              row.data.graphs()[i].settings,
+                                              DVM));
+                    }
+
+                    row.data.graphs(graphs);
+                }
+
+                return row.data;
+            }
         }
     };
 
-    ko.applyBindings(new DashboardViewModel());
+    DVM = new DashboardViewModel(dashboard);
+    DVM = ko.mapping.fromJS(DVM, mapping);
+    ko.applyBindings(DVM);
+
+    ko.bindingHandlers.typeahead = {
+        init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            $(element).typeahead({
+                source: function(query, typeahead) {
+                    $.getJSON('/metrics.json?query='+query, function(data) {
+                        return(typeahead(data.message));
+                    });
+                }
+            });
+        }
+    };
+
+    $('.pagination .disabled a, .pagination .active a').on('click', function(e) {
+        e.preventDefault();
+    });
 
     $('div.btn-group[data-toggle-name=current-toggle]').each(function(){
         var group   = $(this);
