@@ -12,7 +12,11 @@ metrics = Metrics()
 
 @frontend.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html",
+                           dashboard={},
+                           default_graph=default_graph,
+                           graphite_url=graphite_url,
+                           base_url=request.url_root)
 
 @frontend.route("/dashboard/new")
 def new_dashboard():
@@ -64,6 +68,10 @@ def edit_dashboard(dashboard_id):
                                base_url=request.url_root)
     else:
         abort(404)
+
+@frontend.route("/dashboard/search/<term>")
+def dashboard_search(term):
+    return jsonify(message=sorted(Dashboard.search(term)))
 
 @frontend.route("/metrics/search/<term>")
 def metrics_search(term):

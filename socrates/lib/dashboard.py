@@ -38,10 +38,15 @@ class Dashboard(object):
 
     def save(self):
         if self._find_dashboard():
-            query = "UPDATE dashboards SET id = ?, settings = ?"
+            query = "UPDATE dashboards SET id = ?, name = ?, settings = ?"
         else:
-            query = "INSERT INTO dashboards (id, settings) VALUES (?, ?)"
+            query = "INSERT INTO dashboards (id, name, settings) VALUES (?, ?, ?)"
 
-        database.query_db(query, [ self._id, json.dumps(self._dashboard) ],
+        database.query_db(query, [ self._id, self._dashboard["name"], json.dumps(self._dashboard) ],
                           commit=True)
         return True
+
+    @classmethod
+    def search(self, term):
+        query = "SELECT * from dashboards WHERE name LIKE ?"
+        return database.query_db(query, ["%"+term+"%"])

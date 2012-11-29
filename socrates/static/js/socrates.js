@@ -35,15 +35,14 @@ $(function() {
 
         settings = $.extend({}, defaultGraph['settings'], settings);
         settings = $.extend({}, defaultSettings, settings);
-
-        DVM.from.subscribe(function(value) {
-            settings.from(value);
-        });
-        DVM.until.subscribe(function(value) {
-            settings.until(value);
-        });
-
         self.settings = ko.mapping.fromJS(settings, {});
+
+        self.settings.from = ko.computed(function() {
+            return DVM.from();
+        });
+        self.settings.until = ko.computed(function() {
+            return DVM.until();
+        });
 
         targets = (typeof targets === 'undefined' || targets.length == 0) ? defaultGraph['targets'] : targets;
         self.graphTargets = ko.observableArray();
@@ -193,7 +192,7 @@ $(function() {
         init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
             $(element).typeahead({
                 source: function(query, typeahead) {
-                    $.getJSON('/metrics.json?query='+query, function(data) {
+                    $.getJSON('/metrics/search/'+query, function(data) {
                         return(typeahead(data.message));
                     });
                 }
@@ -201,6 +200,59 @@ $(function() {
         }
     };
 
+    $('input.search-query').typeahead({
+        highlighter: function (item) {
+            var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
+            return item.name.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
+                return('<strong>'+match+'</strong>');
+            })
+        },
+        matcher: function(item) {
+            return(~item.name.toLowerCase().indexOf(this.query.toLowerCase()));
+        },
+        sorter: function(items) {
+            var beginswith = [],
+                caseSensitive = []
+                caseInsensitive = []
+                item;
+
+            while (item = items.shift()) {
+                if (!item.name.toLowerCase().indexOf(this.query.toLowerCase())) {
+                    beginswith.push(item);
+                } else if (~item.name.indexOf(this.query)) {
+                    caseSensitive.push(item);
+                } else {
+                    caseInsensitive.push(item);
+                }
+            }
+
+            return(beginswith.concat(caseSensitive, caseInsensitive));
+        },
+        source: function(query, process) {
+            $.getJSON('/dashboard/search/'+query, function(data) {
+                return(process(data.message));
+            });
+        }
+    });
+
+    $('input.search-query').data('typeahead').render = function(items) {
+        var that = this;
+
+        items = $(items).map(function (i, item) {
+            i = $(that.options.item).attr('data-value', item.name);
+            i.find('a').html(that.highlighter(item)).attr('data-dashboard', item.id);
+            return(i[0]);
+        })
+
+        items.first().addClass('active');
+        this.$menu.html(items);
+        return(this);
+    };
+
+    $('input.search-query').data('typeahead').select = function() {
+        var id = this.$menu.find('.active').find('a').attr('data-dashboard');
+        return window.location = '/dashboard/'+id;
+    };
     $('.pagination .disabled a, .pagination .active a').on('click', function(e) {
         e.preventDefault();
     });

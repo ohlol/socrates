@@ -1,5 +1,4 @@
 import json
-import re
 import requests
 
 from werkzeug.contrib.cache import SimpleCache
@@ -24,13 +23,14 @@ class Metrics(object):
             yield ".".join(current)
 
     def index(self):
-        r = requests.get("%s/metrics/index.json" % graphite_url)
-        for metric in json.loads(r.text):
-            fields = metric.strip('.').split('.')
-            for pos, field in enumerate(fields):
-                for key in self.build_keyspace(fields[pos:]):
-                    self._metrics.setdefault(key, set())
-                    self._metrics[key].add(metric)
+        if not self._metrics:
+            r = requests.get("%s/metrics/index.json" % graphite_url)
+            for metric in json.loads(r.text):
+                fields = metric.strip('.').split('.')
+                for pos, field in enumerate(fields):
+                    for key in self.build_keyspace(fields[pos:]):
+                        self._metrics.setdefault(key, set())
+                        self._metrics[key].add(metric)
 
     def search(self, term):
         cache_key = term
@@ -41,10 +41,9 @@ class Metrics(object):
 
         if not rv:
             rv = set()
-            p = re.compile(term)
-            for k in self._metrics.iterkeys():
-                if p.match(k):
-                    rv |= set(self._metrics[k])
+            for key in self._metrics.iterkeys():
+                if term in key:
+                    rv |= set(self._metrics[key])
 
         self._cache.set(cache_key, rv, timeout=5 * 60)
         return rv

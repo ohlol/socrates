@@ -1,7 +1,8 @@
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
 CREATE TABLE dashboards (
-  id char(32) PRIMARY KEY NOT NULL,
+  id CHAR(32) PRIMARY KEY NOT NULL,
+  name VARCHAR(255) NOT NULL,
   settings TEXT NOT NULL
 );
 COMMIT;
