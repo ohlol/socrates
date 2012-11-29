@@ -212,8 +212,8 @@ $(function() {
         },
         sorter: function(items) {
             var beginswith = [],
-                caseSensitive = []
-                caseInsensitive = []
+                caseSensitive = [],
+                caseInsensitive = [],
                 item;
 
             while (item = items.shift()) {
