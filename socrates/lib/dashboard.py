@@ -38,7 +38,7 @@ class Dashboard(object):
 
     def save(self):
         if self._find_dashboard():
-            query = "UPDATE dashboards SET id = ?, name = ?, settings = ?"
+            query = "UPDATE dashboards SET name = ?, settings = ? WHERE id = ?"
         else:
             query = "INSERT INTO dashboards (id, name, settings) VALUES (?, ?, ?)"
 
