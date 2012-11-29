@@ -37,11 +37,11 @@ $(function() {
         settings = $.extend({}, defaultSettings, settings);
         self.settings = ko.mapping.fromJS(settings, {});
 
-        self.settings.from = ko.computed(function() {
-            return DVM.from();
+        DVM.from.subscribe(function(val) {
+            self.settings.from(val);
         });
-        self.settings.until = ko.computed(function() {
-            return DVM.until();
+        DVM.until.subscribe(function(val) {
+            self.settings.until(val);
         });
 
         targets = (typeof targets === 'undefined' || targets.length == 0) ? defaultGraph['targets'] : targets;
