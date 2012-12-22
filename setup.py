@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 
+import sys
+
 from setuptools import setup, find_packages
+
+
+install_requires = ["Flask", "requests"]
+
+if sys.version_info < (2, 7):
+    install_requires.append("argparse")
 
 version = "0.0.1"
 
@@ -22,7 +30,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=["Flask", "requests"],
+    install_requires=install_requires,
     entry_points={
         "console_scripts": [
             "socrates-server = socrates.cli:main"
