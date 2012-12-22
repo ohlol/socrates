@@ -6,7 +6,7 @@ from flask import Flask, abort, g, request
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object("socrates.default_settings")
 app.config.from_pyfile(os.environ.get("SOCRATES_CONFIG",
-                                      "/Users/scott/tmp/socrates.cfg"),
+                                      "/etc/socrates.cfg"),
                        silent=True)
 app.debug = os.environ.get("FLASK_DEBUG", app.config.get("DEBUG", False))
 default_graph = app.config["DEFAULT_GRAPH"]
