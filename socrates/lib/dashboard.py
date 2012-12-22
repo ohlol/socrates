@@ -42,9 +42,11 @@ class Dashboard(object):
             query = "INSERT INTO dashboards (name, settings, id) " +\
                     "VALUES (?, ?, ?)"
 
-        return database.query_db(query, [self.dashboard["name"],
-                                         json.dumps(self.dashboard),
-                                         self._id])
+        database.query_db(query, [self.dashboard["name"],
+                                  json.dumps(self.dashboard),
+                                  self._id])
+
+        return True
 
     @classmethod
     def search(self, term):
