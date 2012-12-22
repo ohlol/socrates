@@ -10,7 +10,7 @@ install_requires = ["Flask", "requests"]
 if sys.version_info < (2, 7):
     install_requires.append("argparse")
 
-version = "0.0.1"
+version = "0.0.2"
 
 setup(
     name="socrates",
