@@ -1,3 +1,6 @@
 *.pyc
 local_settings.py
 socrates.db
+dist
+build
+*.egg-info

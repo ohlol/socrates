@@ -1,0 +1,2 @@
+recursive-include socrates/templates *
+recursive-include socrates/static *
